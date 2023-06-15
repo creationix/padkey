@@ -124,7 +124,13 @@ function PadKey(emit, refresh) {
 
     const editor = document.getElementById("editor")
 
-    const buttonMap = [2, 3, 1, 0, , up, down, left, right]
+    const buttonMap = [2, 3, 1, 0]
+    buttonMap[8] = del
+    buttonMap[9] = "\n"
+    buttonMap[12] = up
+    buttonMap[13] = down
+    buttonMap[14] = left
+    buttonMap[15] = right
     let oldCol
     let oldRow
     let oldButtons = ""
@@ -144,35 +150,26 @@ function PadKey(emit, refresh) {
             let row = y < -0.4 ? 0 : y > 0.4 ? 2 : 1
             const buttons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
             if (col === oldCol && row === oldRow && buttons == oldButtons) continue
-
             const layerIndex = (buttons[4] === "1" ? 1 : 0) + (buttons[5] === '1' ? 2 : 0)
             const layer = layers[layerIndex]
             const cellIndex = row * 3 + col
-            const lifted = []
-            for (let i = 0; i < 10; i++) {
+
+            for (let i = 0, l = buttons.length; i < l; i++) {
                 if (oldButtons[i] === '1' && buttons[i] === '0') {
-                    const cell = layer[cellIndex]
-                    console.log(i, buttonMap[i])
-                    const index = buttonMap[i]
-                    if (typeof index === 'number') {
-                        lifted.push(cell[index])
+                    let action = buttonMap[i] || { i }
+                    if (typeof action === 'number') {
+                        action = layer[cellIndex][action]
+                        action = specialMap[action] || action
+                    }
+                    console.log({ action })
+                    if (typeof action === 'string') {
+                        insert(editor, action)
+                    } else if (typeof action === 'function') {
+                        action(editor)
                     }
                 }
             }
 
-            if (lifted.length === 1) {
-                console.log(lifted)
-                let [l] = lifted
-                l = specialMap[l] || l
-                editor.focus()
-
-                if (typeof l === 'function') {
-                    l(editor)
-                } else {
-                    insert(editor, l)
-                }
-
-            }
             oldCol = col
             oldRow = row
             oldButtons = buttons
