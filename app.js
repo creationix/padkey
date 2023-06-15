@@ -51,14 +51,14 @@ function PadKey(emit, refresh) {
         // up left down right within each
         [
             ['{', 'a', 'b', 'c'],
-            ['up', 'd', 'e', 'f'],
+            [':', 'd', 'e', 'f'],
             ['}', 'g', 'h', 'i'],
-            ['left', 'j', 'k', 'l'],
-            ['del', 'm', 'space', 'n'],
-            ['right', 'o', 'p', 'q'],
+            ['(', 'j', 'k', 'l'],
+            [',', 'm', 'space', 'n'],
+            [')', 'o', 'p', 'q'],
             ['[', 'r', 's', 't'],
-            ['down', 'u', 'v', 'w'],
-            ['enter', 'x', 'y', 'z'],
+            ['=', 'u', 'v', 'w'],
+            [']', 'x', 'y', 'z'],
         ],
         [
             ['0', 'A', 'B', 'C'],
