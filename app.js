@@ -1,4 +1,5 @@
 import { domBuilder } from './dombuilder.js';
+import { del, left, right, up, down } from './cursor.js'
 
 window.addEventListener("gamepadconnected", (e) => {
     console.log(
@@ -16,21 +17,15 @@ window.addEventListener("gamepaddisconnected", (e) => {
 
 const specialMap = {
     space: ' ',
-    /**
-     * @param {HTMLInputElement} el
-     */
-    del(el) {
-        const start = el.selectionStart
-        const end = el.selectionEnd
-        const value = el.value
-        if (start === end) {
-            el.value = value.slice(0, start - 1) + value.slice(end)
-            el.selectionStart = el.selectionEnd = start - 1
-        } else {
-            el.value = value.slice(0, start) + value.slice(end)
-            el.selectionStart = el.selectionEnd = start
-        }
-    },
+    enter: "\n",
+    del, up, down, left, right,
+}
+
+function getRowCol(string, offset) {
+    const lines = string.split('\n')
+    const line = lines[Math.max(0, lines.findIndex((l) => l.length >= offset) - 1)]
+    const col = line.length - offset
+    return [lines.indexOf(line), col]
 }
 /**
  * @param {HTMLInputElement} el
@@ -49,14 +44,14 @@ const layers = [
     // up left down right within each
     [
         ['{', 'a', 'b', 'c'],
-        [':', 'd', 'e', 'f'],
+        ['up', 'd', 'e', 'f'],
         ['}', 'g', 'h', 'i'],
-        ['(', 'j', 'k', 'l'],
+        ['left', 'j', 'k', 'l'],
         ['del', 'm', 'space', 'n'],
-        [')', 'o', 'p', 'q'],
+        ['right', 'o', 'p', 'q'],
         ['[', 'r', 's', 't'],
-        [',', 'u', 'v', 'w'],
-        [']', 'x', 'y', 'z'],
+        ['down', 'u', 'v', 'w'],
+        ['enter', 'x', 'y', 'z'],
     ],
     [
         ['0', 'A', 'B', 'C'],
@@ -203,3 +198,6 @@ function renderGrid(layer, { cell, buttons }) {
         ...layer.map((chars, i) => renderBox(chars, cell === i, buttons))
     ]
 }
+
+
+
