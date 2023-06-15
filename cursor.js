@@ -63,15 +63,26 @@ export function down(el) {
     const offset = before.length - curStart
     const letters = [...el.value]
     const nextStart = letters.indexOf('\n', curStart) + 1
-    console.log({nextStart,length:letters.length})
     if (nextStart <= 0 || nextStart >= letters.length) {
         el.selectionStart = el.selectionEnd = el.value.length
         return
     }
     let nextEnd = letters.indexOf('\n', nextStart)
     if (nextEnd < 0) nextEnd = letters.length
-    console.log({nextStart, offset, nextEnd})
     const pos = Math.min(nextStart + offset, nextEnd)
     const prefix = letters.slice(0, pos).join('')
     el.selectionStart = el.selectionEnd = prefix.length
 }
+
+/**
+ * @param {HTMLInputElement} el
+ * @param {string} txt
+ */
+export function insert(el, txt) {
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const value = el.value
+    el.value = value.slice(0, start) + txt + value.slice(end)
+    el.selectionStart = el.selectionEnd = start + txt.length
+}
+
