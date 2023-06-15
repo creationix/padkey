@@ -16,7 +16,32 @@ window.addEventListener("gamepaddisconnected", (e) => {
 
 const specialMap = {
     space: ' ',
-    del: (text) => text.substring(0, text.length - 1),
+    /**
+     * @param {HTMLInputElement} el
+     */
+    del(el) {
+        const start = el.selectionStart
+        const end = el.selectionEnd
+        const value = el.value
+        if (start === end) {
+            el.value = value.slice(0, start - 1) + value.slice(end)
+            el.selectionStart = el.selectionEnd = start - 1
+        } else {
+            el.value = value.slice(0, start) + value.slice(end)
+            el.selectionStart = el.selectionEnd = start
+        }
+    },
+}
+/**
+ * @param {HTMLInputElement} el
+ * @param {string} txt
+ */
+function insert(el, txt) {
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const value = el.value
+    el.value = value.slice(0, start) + txt + value.slice(end)
+    el.selectionStart = el.selectionEnd = start + txt.length
 }
 
 const layers = [
@@ -102,6 +127,12 @@ const buttonMap = [2, 3, 1, 0]
 let oldCol
 let oldRow
 let oldButtons = ""
+
+editor.onselectionchange = (evt) => {
+    console.log(evt)
+
+}
+
 requestAnimationFrame(update)
 function update() {
     const gamepads = navigator.getGamepads()
@@ -128,11 +159,14 @@ function update() {
             console.log(lifted)
             let [l] = lifted
             l = specialMap[l] || l
+            editor.focus()
+
             if (typeof l === 'function') {
-                editor.textContent = l(editor.textContent)
+                l(editor)
             } else {
-                editor.textContent += l
+                insert(editor, l)
             }
+
         }
         oldCol = col
         oldRow = row
