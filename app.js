@@ -15,7 +15,8 @@ window.addEventListener("gamepaddisconnected", (e) => {
 })
 
 const specialMap = {
-    space: ' '
+    space: ' ',
+    del: (text) => text.substring(0, text.length - 1),
 }
 
 const layers = [
@@ -26,7 +27,7 @@ const layers = [
         [':', 'd', 'e', 'f'],
         ['}', 'g', 'h', 'i'],
         ['(', 'j', 'k', 'l'],
-        ['.', 'm', 'space', 'n'],
+        ['del', 'm', 'space', 'n'],
         [')', 'o', 'p', 'q'],
         ['[', 'r', 's', 't'],
         [',', 'u', 'v', 'w'],
@@ -55,6 +56,18 @@ const layers = [
         ['\'', '"', ':', ','],
         [' ', ' ', ' ', ' '],
     ],
+    // most popular emojis
+    [
+        ['😂', '❤️', '🤣', '👍'],
+        ['😭', '🙏', '😘', '🥰'],
+        ['😍', '😊', '🎉', '😁'],
+        ['💕', '🥺', '😅', '🔥'],
+        ['☺️', '🤦', '♥️', '🤷'],
+        ['🙄', '😆', '🤗', '😉'],
+        ['🎂', '🤔', '👏', '🙂'],
+        ['😳', '🥳', '😎', '👌'],
+        ['💜', '😔', '💪', '🤣'],
+    ],
     // unicode deseret block
     [
         ['𐐀', '𐐁', '𐐂', '𐐃'],
@@ -78,18 +91,6 @@ const layers = [
         // ['𐑈', '𐑉', '𐑊', '𐑋'],
         // ['𐑌', '𐑍', '𐑎', '𐑏'],
     ],
-    // most popular emojis
-    [
-        ['😂', '❤️', '🤣', '👍'],
-        ['😭', '🙏', '😘', '🥰'],
-        ['😍', '😊', '🎉', '😁'],
-        ['💕', '🥺', '😅', '🔥'],
-        ['☺️', '🤦', '♥️', '🤷'],
-        ['🙄', '😆', '🤗', '😉'],
-        ['🎂', '🤔', '👏', '🙂'],
-        ['😳', '🥳', '😎', '👌'],
-        ['💜', '😔', '💪', '🤣'],
-    ],
 ]
 
 
@@ -97,7 +98,7 @@ const layers = [
 const kb = document.querySelector("#keyboard")
 const editor = document.getElementById("editor")
 
-const buttonMap = [2,3,1,0]
+const buttonMap = [2, 3, 1, 0]
 let oldCol
 let oldRow
 let oldButtons = ""
@@ -108,8 +109,8 @@ function update() {
         if (!gp) continue
         const x = gp.axes[0]
         const y = gp.axes[1]
-        let col = x < -0.3 ? 0 : x > 0.3 ? 2 : 1
-        let row = y < -0.3 ? 0 : y > 0.3 ? 2 : 1
+        let col = x < -0.4 ? 0 : x > 0.4 ? 2 : 1
+        let row = y < -0.4 ? 0 : y > 0.4 ? 2 : 1
         const buttons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
         if (col === oldCol && row === oldRow && buttons == oldButtons) continue
 
@@ -120,13 +121,18 @@ function update() {
         for (let i = 0; i < 4; i++) {
             if (oldButtons[i] === '1' && buttons[i] === '0') {
                 const cell = layer[cellIndex]
-                let button = cell[buttonMap[i]]
-                lifted.push(specialMap[button] || button)
+                lifted.push(cell[buttonMap[i]])
             }
         }
         if (lifted.length === 1) {
             console.log(lifted)
-            editor.textContent += lifted[0]
+            let [l] = lifted
+            l = specialMap[l] || l
+            if (typeof l === 'function') {
+                editor.textContent = l(editor.textContent)
+            } else {
+                editor.textContent += l
+            }
         }
         oldCol = col
         oldRow = row
