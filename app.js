@@ -2,12 +2,11 @@ import { del, insert, left, right, up, down } from './cursor.js'
 import { createComponent } from './domchanger.js'
 
 
-function renderBox([u, l, d, r], current, buttons) {
+function renderBox(characters, current, cell) {
     return [`.box${current ? ".current" : ""}`,
-    [`.up${buttons[3] === '1' ? ".pressed" : ""}.${charClass(u)}`, u],
-    [`.left${buttons[2] === '1' ? ".pressed" : ""}.${charClass(l)}`, l],
-    [`.right${buttons[1] === '1' ? ".pressed" : ""}.${charClass(r)}`, r],
-    [`.down${buttons[0] === '1' ? ".pressed" : ""}.${charClass(d)}`, d],
+    ...characters.map((c, i) =>
+        [`.cell${cell === i ? '.current' : ''}.${charClass(c)}`, c]
+    )
     ]
 }
 
@@ -19,9 +18,9 @@ function charClass(c) {
     return "other"
 }
 
-function renderGrid(layer, { cell, buttons }) {
+function renderGrid(layer, { cell, cell2 }) {
     return [".grid",
-        ...layer.map((chars, i) => renderBox(chars, cell === i, buttons))
+        ...layer.map((chars, i) => renderBox(chars, cell === i, cell2))
     ]
 }
 
@@ -48,75 +47,35 @@ function PadKey(emit, refresh) {
 
     const layers = [
         // top-left to bottom right
-        // up left down right within each
+        // same within each
         [
-            ['{', 'a', 'b', 'c'],
-            [':', 'd', 'e', 'f'],
-            ['}', 'g', 'h', 'i'],
-            ['(', 'j', 'k', 'l'],
-            [',', 'm', 'space', 'n'],
-            [')', 'o', 'p', 'q'],
-            ['[', 'r', 's', 't'],
-            ['=', 'u', 'v', 'w'],
-            [']', 'x', 'y', 'z'],
-        ],
-        [
-            ['0', 'A', 'B', 'C'],
-            ['1', 'D', 'E', 'F'],
-            ['2', 'G', 'H', 'I'],
-            ['3', 'J', 'K', 'L'],
-            ['4', 'M', '5', 'N'],
-            ['6', 'O', 'P', 'Q'],
-            ['7', 'R', 'S', 'T'],
-            ['8', 'U', 'V', 'W'],
-            ['9', 'X', 'Y', 'Z'],
-        ],
-        // other symbols
-        [
-            ['!', '@', '#', '$'],
-            ['%', '^', '&', '*'],
-            ['-', '_', '=', '+'],
-            ['/', '\\', '?', '.'],
-            ['`', '~', '[', ']'],
-            ['{', '}', '|', ';'],
-            ['(', ')', '<', '>'],
-            ['\'', '"', ':', ','],
-            [' ', ' ', ' ', ' '],
-        ],
-        // most popular emojis
-        [
-            ['😂', '❤️', '🤣', '👍'],
-            ['😭', '🙏', '😘', '🥰'],
-            ['😍', '😊', '🎉', '😁'],
-            ['💕', '🥺', '😅', '🔥'],
-            ['☺️', '🤦', '♥️', '🤷'],
-            ['🙄', '😆', '🤗', '😉'],
-            ['🎂', '🤔', '👏', '🙂'],
-            ['😳', '🥳', '😎', '👌'],
-            ['💜', '😔', '💪', '🤣'],
-        ],
-        // unicode deseret block
-        [
-            ['𐐀', '𐐁', '𐐂', '𐐃'],
-            ['𐐄', '𐐅', '𐐆', '𐐇'],
-            ['𐐈', '𐐉', '𐐊', '𐐋'],
-            ['𐐌', '𐐍', '𐐎', '𐐏'],
-            ['𐐐', '𐐑', '𐐒', '𐐓'],
-            ['𐐔', '𐐕', '𐐖', '𐐗'],
-            ['𐐘', '𐐙', '𐐚', '𐐛'],
-            ['𐐜', '𐐝', '𐐞', '𐐟'],
-            ['𐐠', '𐐡', '𐐢', '𐐣'],
-            // ['𐐤', '𐐥', '𐐦', '𐐧'],
-            // ['𐐨', '𐐩', '𐐪', '𐐫'],
-            // ['𐐬', '𐐭', '𐐮', '𐐯'],
-            // ['𐐰', '𐐱', '𐐲', '𐐳'],
-            // ['𐐴', '𐐵', '𐐶', '𐐷'],
-            // ['𐐸', '𐐹', '𐐺', '𐐻'],
-            // ['𐐼', '𐐽', '𐐾', '𐐿'],
-            // ['𐑀', '𐑁', '𐑂', '𐑃'],
-            // ['𐑄', '𐑅', '𐑆', '𐑇'],
-            // ['𐑈', '𐑉', '𐑊', '𐑋'],
-            // ['𐑌', '𐑍', '𐑎', '𐑏'],
+            [' ', '1', ' ',
+                'a', ' ', 'c',
+                ' ', 'b', ' '],
+            [' ', '2', ' ',
+                'd', ' ', 'f',
+                ' ', 'e', ' '],
+            [' ', '3', ' ',
+                'g', ' ', 'i',
+                ' ', 'h', ' '],
+            [' ', '4', ' ',
+                'k', ' ', 'l',
+                ' ', 'k', ' '],
+            [' ', '5', ' ',
+                'm', ' ', 'n',
+                ' ', '0', ' '],
+            [' ', '6', ' ',
+                'o', ' ', 'q',
+                ' ', 'p', ' '],
+            [' ', '7', ' ',
+                'r', ' ', 't',
+                ' ', 's', ' '],
+            [' ', '8', ' ',
+                'u', ' ', 'w',
+                ' ', 'v', ' '],
+            [' ', '9', ' ',
+                'x', ' ', 'z',
+                ' ', 'y', ' '],
         ],
     ]
 
@@ -131,12 +90,18 @@ function PadKey(emit, refresh) {
     buttonMap[13] = down
     buttonMap[14] = left
     buttonMap[15] = right
-    let oldCol
-    let oldRow
+    let oldCell
+    let oldCell2
     let oldButtons = ""
 
     editor.onselectionchange = (evt) => {
         console.log(evt)
+    }
+
+    function getCell(x, y) {
+        let col = x < -0.4 ? 0 : x > 0.4 ? 2 : 1
+        let row = y < -0.4 ? 0 : y > 0.4 ? 2 : 1
+        return row * 3 + col
     }
 
     requestAnimationFrame(update)
@@ -144,21 +109,31 @@ function PadKey(emit, refresh) {
         const gamepads = navigator.getGamepads()
         for (const gp of gamepads) {
             if (!gp) continue
-            const x = gp.axes[0]
-            const y = gp.axes[1]
-            let col = x < -0.4 ? 0 : x > 0.4 ? 2 : 1
-            let row = y < -0.4 ? 0 : y > 0.4 ? 2 : 1
+            const cell = getCell(gp.axes[0], gp.axes[1])
+            const cell2 = getCell(gp.axes[2], gp.axes[3])
             const buttons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
-            if (col === oldCol && row === oldRow && buttons == oldButtons) continue
+            if (cell === oldCell && cell2 === oldCell2 && buttons == oldButtons) continue
+            if (gp.hapticActuators && gp.hapticActuators.length) {
+                gp.hapticActuators[0].pulse(1.0, 200);
+            }
+            if (gp.vibrationActuator) {
+                gp.vibrationActuator.playEffect("dual-rumble", {
+                    startDelay: 0,
+                    duration: 50,
+                    weakMagnitude: 1.0,
+                    strongMagnitude: 0.0,
+                });
+            }
+
+
             const layerIndex = (buttons[4] === "1" ? 1 : 0) + (buttons[5] === '1' ? 2 : 0)
             const layer = layers[layerIndex]
-            const cellIndex = row * 3 + col
 
             for (let i = 0, l = buttons.length; i < l; i++) {
                 if (oldButtons[i] === '1' && buttons[i] === '0') {
                     let action = buttonMap[i] || { i }
                     if (typeof action === 'number') {
-                        action = layer[cellIndex][action]
+                        action = layer[cell][action]
                         action = specialMap[action] || action
                     }
                     console.log({ action })
@@ -170,16 +145,15 @@ function PadKey(emit, refresh) {
                 }
             }
 
-            oldCol = col
-            oldRow = row
+            oldCell = cell
+            oldCell2 = cell2
             oldButtons = buttons
 
             state = [
-                layer, {
-                    cell: cellIndex,
-                    buttons: buttons
-                }
+                layer,
+                { cell, cell2 },
             ]
+            console.log({ cell, cell2 })
             refresh()
         }
         requestAnimationFrame(update)

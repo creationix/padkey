@@ -57,7 +57,7 @@ textarea {
     color:#faa;
 }
 
-.box.current {
+.box.current, .cell.current {
     background-color: #222;
 }
 
@@ -66,19 +66,6 @@ textarea {
     /* background-color: #123; */
 }
 
-.box.current .pressed {
+.box.current .pressed, .cell.current {
     background-color: #444;
-}
-
-.box .up,
-.box .down {
-    grid-column: 2;
-}
-
-.box .left {
-    grid-column: 1;
-}
-
-.box .right {
-    grid-column: 3;
 }
