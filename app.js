@@ -18,9 +18,9 @@ function charClass(c) {
     return "other"
 }
 
-function renderGrid(layer, { cell, cell2 }) {
+function renderGrid(layer, { cell1, cell2 }) {
     return [".grid",
-        ...layer.map((chars, i) => renderBox(chars, cell === i, cell2))
+        ...layer.map((chars, i) => renderBox(chars, cell1 === i, cell2))
     ]
 }
 
@@ -49,33 +49,62 @@ function PadKey(emit, refresh) {
         // top-left to bottom right
         // same within each
         [
+            ['(', '1', ')',
+             'a', 'τ', 'c',
+             '<', 'b', '>'],
+            ['|', '2', '?',
+             'd', '↑', 'f',
+             '\\', 'e', '/'],
+            ['{', '3', '}',
+             'g', 'ε', 'i',
+             '[', 'h', ']'],
+            [';', '4', '"',
+             'k', '←', 'l',
+             ':', 'k', '\''],
+            ['-', '5', '+',
+             'm', 'space', 'n',
+             '_', '0', '='],
+            ['*', '6', '%',
+             'o', '→', 'q',
+             '×', 'p', '÷'],
+            ['~', '7', '!',
+             'r', 'λ', 't',
+             '`', 's', '@'],
+            [',', '8', '.',
+             'u', '↓', 'w',
+             ' ', 'v', ' '],
+            ['#', '9', '$',
+             'x', 'μ', 'z',
+             '∙', 'y', '^'],
+        ],
+        [
             [' ', '1', ' ',
-                'a', ' ', 'c',
-                ' ', 'b', ' '],
+             'A', ' ', 'C',
+             ' ', 'B', ' '],
             [' ', '2', ' ',
-                'd', ' ', 'f',
-                ' ', 'e', ' '],
+             'D', ' ', 'F',
+             ' ', 'E', ' '],
             [' ', '3', ' ',
-                'g', ' ', 'i',
-                ' ', 'h', ' '],
+             'G', ' ', 'I',
+             ' ', 'H', ' '],
             [' ', '4', ' ',
-                'k', ' ', 'l',
-                ' ', 'k', ' '],
+             'K', ' ', 'L',
+             ' ', 'K', ' '],
             [' ', '5', ' ',
-                'm', ' ', 'n',
-                ' ', '0', ' '],
+             'M', 'del', 'N',
+             ' ', '0', ' '],
             [' ', '6', ' ',
-                'o', ' ', 'q',
-                ' ', 'p', ' '],
+             'O', ' ', 'Q',
+             ' ', 'P', ' '],
             [' ', '7', ' ',
-                'r', ' ', 't',
-                ' ', 's', ' '],
+             'R', ' ', 'T',
+             ' ', 'S', ' '],
             [' ', '8', ' ',
-                'u', ' ', 'w',
-                ' ', 'v', ' '],
+             'U', ' ', 'W',
+             ' ', 'V', ' '],
             [' ', '9', ' ',
-                'x', ' ', 'z',
-                ' ', 'y', ' '],
+             'X', ' ', 'Z',
+             ' ', 'Y', ' '],
         ],
     ]
 
@@ -90,7 +119,7 @@ function PadKey(emit, refresh) {
     buttonMap[13] = down
     buttonMap[14] = left
     buttonMap[15] = right
-    let oldCell
+    let oldCell1
     let oldCell2
     let oldButtons = ""
 
@@ -109,51 +138,39 @@ function PadKey(emit, refresh) {
         const gamepads = navigator.getGamepads()
         for (const gp of gamepads) {
             if (!gp) continue
-            const cell = getCell(gp.axes[0], gp.axes[1])
+
+            const cell1 = getCell(gp.axes[0], gp.axes[1])
             const cell2 = getCell(gp.axes[2], gp.axes[3])
             const buttons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
-            if (cell === oldCell && cell2 === oldCell2 && buttons == oldButtons) continue
-            if (gp.hapticActuators && gp.hapticActuators.length) {
-                gp.hapticActuators[0].pulse(1.0, 200);
+            if (cell1 === oldCell1 && cell2 === oldCell2 && buttons == oldButtons) continue
+
+            if (buttons != oldButtons) {
+                console.log("Buttons", 
+                    [...buttons]
+                        .map((p,i)=>[i,p])
+                        .filter(([i,p])=>p==='1')
+                        .map(([i,p])=>`${i}:${p}`)
+                        .join(", ")
+                )
             }
+
+            // Slight buzz when something changes
             if (gp.vibrationActuator) {
                 gp.vibrationActuator.playEffect("dual-rumble", {
-                    startDelay: 0,
-                    duration: 50,
-                    weakMagnitude: 1.0,
+                    duration: 25,
+                    weakMagnitude: 0.5,
                     strongMagnitude: 0.0,
                 });
             }
 
-
-            const layerIndex = (buttons[4] === "1" ? 1 : 0) + (buttons[5] === '1' ? 2 : 0)
-            const layer = layers[layerIndex]
-
-            for (let i = 0, l = buttons.length; i < l; i++) {
-                if (oldButtons[i] === '1' && buttons[i] === '0') {
-                    let action = buttonMap[i] || { i }
-                    if (typeof action === 'number') {
-                        action = layer[cell][action]
-                        action = specialMap[action] || action
-                    }
-                    console.log({ action })
-                    if (typeof action === 'string') {
-                        insert(editor, action)
-                    } else if (typeof action === 'function') {
-                        action(editor)
-                    }
-                }
-            }
-
-            oldCell = cell
+            oldCell1 = cell1
             oldCell2 = cell2
             oldButtons = buttons
 
             state = [
-                layer,
-                { cell, cell2 },
+                layers[buttons[10] === "1" || buttons[11] === "1" ? 1 : 0],
+                { cell1, cell2 },
             ]
-            console.log({ cell, cell2 })
             refresh()
         }
         requestAnimationFrame(update)
