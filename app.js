@@ -43,67 +43,69 @@ function PadKey(emit, refresh) {
         // same within each
         [
             ['(', '1', ')',
-             'a', 'τ', 'c',
-             '<', 'b', '>'],
+                'a', 'τ', 'c',
+                '<', 'b', '>'],
             ['|', '2', '?',
-             'd', '↑', 'f',
-             '\\', 'e', '/'],
+                'd', '↑', 'f',
+                '\\', 'e', '/'],
             ['{', '3', '}',
-             'g', 'ε', 'i',
-             '[', 'h', ']'],
+                'g', 'ε', 'i',
+                '[', 'h', ']'],
             [';', '4', '"',
-             'k', '←', 'l',
-             ':', 'k', '\''],
+                'k', '←', 'l',
+                ':', 'k', '\''],
             ['-', '5', '+',
-             'm', ' ', 'n',
-             '_', '0', '='],
+                'm', ' ', 'n',
+                '_', '0', '='],
             ['*', '6', '%',
-             'o', '→', 'q',
-             '×', 'p', '÷'],
+                'o', '→', 'q',
+                '×', 'p', '÷'],
             ['~', '7', '!',
-             'r', 'λ', 't',
-             '`', 's', '@'],
+                'r', 'λ', 't',
+                '`', 's', '@'],
             [',', '8', '.',
-             'u', '↓', 'w',
-             ' ', 'v', ' '],
+                'u', '↓', 'w',
+                ' ', 'v', ' '],
             ['#', '9', '$',
-             'x', 'μ', 'z',
-             '∙', 'y', '^'],
+                'x', 'μ', 'z',
+                '∙', 'y', '^'],
         ],
         [
             [' ', '1', ' ',
-             'A', ' ', 'C',
-             ' ', 'B', ' '],
+                'A', ' ', 'C',
+                ' ', 'B', ' '],
             [' ', '2', ' ',
-             'D', ' ', 'F',
-             ' ', 'E', ' '],
+                'D', ' ', 'F',
+                ' ', 'E', ' '],
             [' ', '3', ' ',
-             'G', ' ', 'I',
-             ' ', 'H', ' '],
+                'G', ' ', 'I',
+                ' ', 'H', ' '],
             [' ', '4', ' ',
-             'K', ' ', 'L',
-             ' ', 'K', ' '],
+                'K', ' ', 'L',
+                ' ', 'K', ' '],
             [' ', '5', ' ',
-             'M', ' ', 'N',
-             ' ', '0', ' '],
+                'M', ' ', 'N',
+                ' ', '0', ' '],
             [' ', '6', ' ',
-             'O', ' ', 'Q',
-             ' ', 'P', ' '],
+                'O', ' ', 'Q',
+                ' ', 'P', ' '],
             [' ', '7', ' ',
-             'R', ' ', 'T',
-             ' ', 'S', ' '],
+                'R', ' ', 'T',
+                ' ', 'S', ' '],
             [' ', '8', ' ',
-             'U', ' ', 'W',
-             ' ', 'V', ' '],
+                'U', ' ', 'W',
+                ' ', 'V', ' '],
             [' ', '9', ' ',
-             'X', ' ', 'Z',
-             ' ', 'Y', ' '],
+                'X', ' ', 'Z',
+                ' ', 'Y', ' '],
         ],
     ]
 
     let state
 
+    /** @type {HTMLInputElement} */
     const editor = document.getElementById("editor")
+    editor.value = localStorage.getItem("text") || ""
 
     let cell1 = 4
     let cell2 = 4
@@ -119,6 +121,12 @@ function PadKey(emit, refresh) {
         return row * 3 + col
     }
 
+    function syncText() {
+        editor.parentNode.dataset.replicatedValue = editor.value
+        localStorage.setItem("text", editor.value)
+    }
+    editor.oninput = syncText
+
     function onButtonUp(index) {
         switch (index) {
             case 4: del(editor); break
@@ -133,8 +141,9 @@ function PadKey(emit, refresh) {
             case 14: left(editor); break
             case 15: right(editor); break
             default:
-                insert(editor, "key " + index)
+                // insert(editor, "key " + index)
         }
+        syncText()
     }
 
     function onButtonDown(index) {
@@ -144,6 +153,7 @@ function PadKey(emit, refresh) {
     function getLayer(layers, buttons) {
         return layers[buttons[10] === "1" || buttons[11] === "1" ? 1 : 0]
     }
+
 
     requestAnimationFrame(update)
     function update() {
@@ -178,7 +188,6 @@ function PadKey(emit, refresh) {
                     strongMagnitude: 0.0,
                 });
             }
-
 
             state = [
                 getLayer(layers, buttons),

@@ -7,13 +7,25 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json">    
+    <link rel="manifest" href="manifest.json">
     <title>PadKey Studio</title>
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div id="keyboard" style="float:left;border:1px solid #666;"></div>
     <style>
+        .grow-wrap { display: grid; }
+        .grow-wrap::after {
+            content: attr(data-replicated-value) " ";
+            white-space: pre-wrap;
+            visibility: hidden;
+        }
+        .grow-wrap > textarea {
+            resize: none;
+            overflow: hidden;
+            color: #fff;
+            background-color: #111;
+        }
         .grow-wrap > textarea,
         .grow-wrap::after {
             /* Identical styling required!! */
@@ -26,7 +38,7 @@
         }
     </style>
     <div class="grow-wrap">
-        <textarea id="editor" onInput="this.parentNode.dataset.replicatedValue=this.value"></textarea>
+        <textarea id="editor"></textarea>
     </div>
 
 </body>
