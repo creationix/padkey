@@ -4,7 +4,7 @@ import { createComponent } from './domchanger.js'
 function renderBox(characters, current, cell) {
     return [`.box${current ? ".current" : ""}`,
     ...characters.map((c, i) =>
-        [`.cell${cell === i ? '.current' : ''}.${charClass(c)}`, c]
+        [`.cell${current && cell === i ? '.current' : ''}.${charClass(c)}`, c]
     )
     ]
 }
@@ -71,15 +71,15 @@ function PadKey(emit, refresh) {
                 '∙', 'y', '^'],
         ],
         [
-            [' ', '1', ' ',
-                'A', ' ', 'C',
-                ' ', 'B', ' '],
-            [' ', '2', ' ',
-                'D', ' ', 'F',
-                ' ', 'E', ' '],
-            [' ', '3', ' ',
-                'G', ' ', 'I',
-                ' ', 'H', ' '],
+            ['😀', '1', '😅',
+                'A', '🫠', 'C',
+                '😂', 'B', '😇'],
+            ['🦊', '2', '🪼',
+                'D', '🦋', 'F',
+                '🐯', 'E', '🐻‍❄️'],
+            ['😍', '3', '🤩',
+                'G', '🥰', 'I',
+                '🤪', 'H', '😜'],
             [' ', '4', ' ',
                 'K', ' ', 'L',
                 ' ', 'K', ' '],
@@ -95,9 +95,9 @@ function PadKey(emit, refresh) {
             [' ', '8', ' ',
                 'U', ' ', 'W',
                 ' ', 'V', ' '],
-            [' ', '9', ' ',
-                'X', ' ', 'Z',
-                ' ', 'Y', ' '],
+            ['🤯', '9', '🥶',
+                'X', '🤕', 'Z',
+                '🥵', 'Y', '🤢'],
         ],
     ]
 
