@@ -1,0 +1,8 @@
+{
+    "short_name": "PadKey",
+    "name": "PadKey Studio",
+    "background_color": "#000",
+    "theme_color": "#369",
+    "start_url": "/padkey/",
+    "display": "fullscreen"
+}

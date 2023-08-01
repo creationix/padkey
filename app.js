@@ -1,7 +1,6 @@
 import { del, insert, left, right, up, down } from './cursor.js'
 import { createComponent } from './domchanger.js'
 
-
 function renderBox(characters, current, cell) {
     return [`.box${current ? ".current" : ""}`,
     ...characters.map((c, i) =>
@@ -39,12 +38,6 @@ function PadKey(emit, refresh) {
         console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id)
     })
 
-    const specialMap = {
-        space: ' ',
-        enter: "\n",
-        del, up, down, left, right,
-    }
-
     const layers = [
         // top-left to bottom right
         // same within each
@@ -62,7 +55,7 @@ function PadKey(emit, refresh) {
              'k', '←', 'l',
              ':', 'k', '\''],
             ['-', '5', '+',
-             'm', 'space', 'n',
+             'm', ' ', 'n',
              '_', '0', '='],
             ['*', '6', '%',
              'o', '→', 'q',
@@ -91,7 +84,7 @@ function PadKey(emit, refresh) {
              'K', ' ', 'L',
              ' ', 'K', ' '],
             [' ', '5', ' ',
-             'M', 'del', 'N',
+             'M', ' ', 'N',
              ' ', '0', ' '],
             [' ', '6', ' ',
              'O', ' ', 'Q',
@@ -112,16 +105,9 @@ function PadKey(emit, refresh) {
 
     const editor = document.getElementById("editor")
 
-    const buttonMap = [2, 3, 1, 0]
-    buttonMap[8] = del
-    buttonMap[9] = "\n"
-    buttonMap[12] = up
-    buttonMap[13] = down
-    buttonMap[14] = left
-    buttonMap[15] = right
-    let oldCell1
-    let oldCell2
-    let oldButtons = ""
+    let cell1 = 4
+    let cell2 = 4
+    let buttons = ""
 
     editor.onselectionchange = (evt) => {
         console.log(evt)
@@ -133,26 +119,56 @@ function PadKey(emit, refresh) {
         return row * 3 + col
     }
 
+    function onButtonUp(index) {
+        switch (index) {
+            case 4: del(editor); break
+            case 5: insert(editor, "\n"); break
+            case 6: case 7: // Trigger click
+                const layer = getLayer(layers, buttons)
+                const key = layer[cell1][cell2]
+                insert(editor, key)
+                break
+            case 12: up(editor); break
+            case 13: down(editor); break
+            case 14: left(editor); break
+            case 15: right(editor); break
+            default:
+                insert(editor, "key " + index)
+        }
+    }
+
+    function onButtonDown(index) {
+
+    }
+
+    function getLayer(layers, buttons) {
+        return layers[buttons[10] === "1" || buttons[11] === "1" ? 1 : 0]
+    }
+
     requestAnimationFrame(update)
     function update() {
         const gamepads = navigator.getGamepads()
         for (const gp of gamepads) {
             if (!gp) continue
 
-            const cell1 = getCell(gp.axes[0], gp.axes[1])
-            const cell2 = getCell(gp.axes[2], gp.axes[3])
-            const buttons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
-            if (cell1 === oldCell1 && cell2 === oldCell2 && buttons == oldButtons) continue
-
-            if (buttons != oldButtons) {
-                console.log("Buttons", 
-                    [...buttons]
-                        .map((p,i)=>[i,p])
-                        .filter(([i,p])=>p==='1')
-                        .map(([i,p])=>`${i}:${p}`)
-                        .join(", ")
-                )
+            const newCell1 = getCell(gp.axes[0], gp.axes[1])
+            const newCell2 = getCell(gp.axes[2], gp.axes[3])
+            const newButtons = gp.buttons.map(b => b.pressed ? '1' : '0').join('')
+            if (newCell1 === cell1 && newCell2 === cell2 && newButtons == buttons) continue
+            cell1 = newCell1
+            cell2 = newCell2
+            const oldButtons = buttons
+            buttons = newButtons
+            for (let i = 0, l = newButtons.length; i < l; i++) {
+                const b = buttons[i]
+                const o = oldButtons[i]
+                if (o === "1" && b === "0") {
+                    onButtonUp(i)
+                } else if (o === "0" && b === "1") {
+                    onButtonDown(i)
+                }
             }
+            editor.focus()
 
             // Slight buzz when something changes
             if (gp.vibrationActuator) {
@@ -163,13 +179,10 @@ function PadKey(emit, refresh) {
                 });
             }
 
-            oldCell1 = cell1
-            oldCell2 = cell2
-            oldButtons = buttons
 
             state = [
-                layers[buttons[10] === "1" || buttons[11] === "1" ? 1 : 0],
-                { cell1, cell2 },
+                getLayer(layers, buttons),
+                { cell1: newCell1, cell2: newCell2 },
             ]
             refresh()
         }

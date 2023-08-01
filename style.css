@@ -9,19 +9,6 @@ html {
     padding: 0;
 }
 
-textarea {
-    background-color: #111;
-    border: 0;
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
-    font-size: 24px;
-    font-weight: 300;
-    line-height: 1.5;
-    margin: 0;
-    padding: 10px;
-    resize: none;
-}
-
 .grid {
     display: grid;
     font-size: 24px;
