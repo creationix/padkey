@@ -198,6 +198,8 @@ function PadKey(emit, refresh) {
         requestAnimationFrame(update)
     }
 
+    syncText()
+
     return {
         render() {
             return renderGrid(...state)
